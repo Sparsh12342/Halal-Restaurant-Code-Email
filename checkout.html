@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout • Sheran's Halal Meat</title>
+
+  <!-- Reuse your styles + icons -->
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
+
+  <style>
+    /* Light polish for the cart table using your palette */
+    .container-narrow { max-width: 968px; margin: 0 auto; }
+    .cart-card { background: #fff; box-shadow: 0 8px 11px rgb(14 55 54 / 15%); border-radius: .75rem; overflow: hidden; }
+    .cart-header { display:flex; align-items:center; justify-content:space-between; padding:1rem 1.25rem; border-bottom: 1px solid #eee; }
+    .cart-grid { width:100%; border-collapse: collapse; }
+    .cart-grid th, .cart-grid td { padding: .9rem; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .cart-grid th { text-align:left; font-weight:700; }
+    .qty-input { width: 72px; padding: .35rem .5rem; border: 1px solid #ddd; border-radius: 8px; text-align: center; }
+    .remove-btn { background: none; border: 0; cursor: pointer; font-size: 18px; color: var(--red-color); }
+    .totals { display:flex; justify-content:flex-end; gap:2rem; padding: 1rem 1.25rem; }
+    .totals .sum { min-width: 260px; }
+    .sum-row { display:flex; justify-content:space-between; margin:.35rem 0; }
+    .sum-row.total { font-weight: 800; font-size: 1.1rem; }
+    .actions { display:flex; gap:.75rem; padding: 1rem 1.25rem; }
+    .actions .btn { cursor:pointer; }
+    .customer-form { display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:.75rem; padding: 1rem 1.25rem; border-top: 1px solid #eee; }
+    .customer-form input, .customer-form textarea, .customer-form select {
+      padding:.6rem .7rem; border:1px solid #ddd; border-radius:8px; width:100%;
+    }
+    .empty { text-align:center; padding:2rem; color:#777; }
+    .muted { color:#7a7a7a; font-size:.9rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="index.html#home" class="logo">
+      <i class="bx bxs-basket"></i> Sheran's Halal Meat
+    </a>
+    <ul class="navbar">
+      <li><a href="index.html#home">Home</a></li>
+      <li><a href="index.html#categories">Categories</a></li>
+      <li><a href="index.html#products">Products</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <div class="profile">
+      <span>Cart: <span id="cart-count">0</span></span>
+    </div>
+  </header>
+
+  <main class="container-narrow" style="padding-top:1.25rem;">
+    <div class="heading">
+      <h1>Checkout</h1>
+      <a href="index.html#categories" class="btn">Continue Shopping <i class="bx bx-right-arrow-alt"></i></a>
+    </div>
+
+    <section class="cart-card">
+      <div class="cart-header">
+        <strong>Your Cart</strong>
+        <span id="cart-updated" class="muted"></span>
+      </div>
+
+      <div id="cart-body">
+        <!-- Cart table injected here -->
+      </div>
+
+      <form id="order-form">
+        <div class="customer-form">
+          <div>
+            <label>Full Name</label>
+            <input required name="name" placeholder="Your name" />
+          </div>
+          <div>
+            <label>Phone</label>
+            <input required name="phone" placeholder="(xxx) xxx-xxxx" />
+          </div>
+          <div>
+            <label>Preferred Time</label>
+            <input name="time" placeholder="Today 5:30 PM" />
+          </div>
+          <div>
+            <label>Contact Method</label>
+            <select name="contact" required>
+              <option value="call">Phone Call</option>
+              <option value="sms">SMS</option>
+              <option value="whatsapp">WhatsApp</option>
+            </select>
+          </div>
+          <div style="grid-column:1/-1">
+            <label>Notes (cutting, spice level, special instructions)</label>
+            <textarea name="notes" rows="3" placeholder="e.g., thin slices, medium spice, curbside pickup"></textarea>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="clear-cart" class="btn" style="background:#eee;color:#333;">Clear Cart</button>
+          <button type="submit" class="btn">Place Order <i class="bx bx-cart-alt"></i></button>
+        </div>
+      </form>
+    </section>
+
+    <p class="muted" style="margin-top:.75rem;">We’ll confirm your order and total by phone/text. Prices are estimates; final weight-based price is calculated at the counter.</p>
+  </main>
+
+  <script>
+    // ---- Cart helpers ----
+    const CART_KEY = "shm_cart_v1";
+    const $ = (s, r=document) => r.querySelector(s);
+    const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+    const fmt = v => "$" + (Math.round(v * 100) / 100).toFixed(2);
+
+    function readCart() {
+      try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); }
+      catch { return []; }
+    }
+    function writeCart(items) {
+      localStorage.setItem(CART_KEY, JSON.stringify(items));
+      updateCartCount();
+      $("#cart-updated").textContent = "Updated just now";
+      setTimeout(()=> $("#cart-updated").textContent = "", 1500);
+    }
+    function updateCartCount() { const c = readCart().length; const el = $("#cart-count"); if (el) el.textContent = c; }
+
+    function calcTotals(items) {
+      let subtotal = 0;
+      items.forEach(it => { subtotal += (it.unitPrice || 0) * (it.qty || 1); });
+      const taxRate = 0; // change if you want to include tax
+      const tax = subtotal * taxRate;
+      return { subtotal, tax, total: subtotal + tax };
+    }
+
+    // ---- Render cart ----
+    function renderCart() {
+      const items = readCart();
+      updateCartCount();
+
+      if (!items.length) {
+        $("#cart-body").innerHTML = '<div class="empty">Your cart is empty.</div>';
+        return;
+      }
+
+      const rows = items.map((it, idx) => {
+        const line = (it.unitPrice || 0) * (it.qty || 1);
+        const opts = [
+          it.cut ? `Cut: ${it.cut}` : null,
+          it.spice ? `Spice: ${it.spice}` : null,
+          it.weight ? `Weight: ${it.weight}` : null
+        ].filter(Boolean).join(" • ");
+
+        return `
+          <tr>
+            <td style="width:64px">
+              ${it.img ? `<img src="${it.img}" alt="${it.name}" style="width:64px;height:64px;object-fit:cover;border-radius:8px">` : ""}
+            </td>
+            <td>
+              <div style="font-weight:600">${it.name}</div>
+              <div class="muted" style="margin-top:.15rem">${opts}</div>
+              <div class="muted">Category: ${it.category || "-"}</div>
+            </td>
+            <td>${fmt(it.unitPrice || 0)}</td>
+            <td>
+              <input class="qty-input" type="number" min="1" value="${it.qty || 1}" data-idx="${idx}">
+            </td>
+            <td>${fmt(line)}</td>
+            <td>
+              <button class="remove-btn" data-remove="${idx}" title="Remove">
+                <i class="bx bx-trash"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      const { subtotal, tax, total } = calcTotals(items);
+
+      $("#cart-body").innerHTML = `
+        <div style="overflow-x:auto">
+          <table class="cart-grid">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Item</th>
+                <th>Unit</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+
+        <div class="totals">
+          <div class="sum">
+            <div class="sum-row"><span>Subtotal</span><strong>${fmt(subtotal)}</strong></div>
+            <div class="sum-row"><span>Tax</span><strong>${fmt(tax)}</strong></div>
+            <div class="sum-row total"><span>Grand Total</span><strong>${fmt(total)}</strong></div>
+          </div>
+        </div>
+      `;
+
+      // Bind events
+      $$(".qty-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const i = Number(e.target.dataset.idx);
+          const val = Math.max(1, Number(e.target.value || 1));
+          const cart = readCart();
+          if (cart[i]) { cart[i].qty = val; writeCart(cart); renderCart(); }
+        });
+      });
+
+      $$(".remove-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.preventDefault();
+          const i = Number(e.currentTarget.dataset.remove);
+          const cart = readCart();
+          cart.splice(i, 1);
+          writeCart(cart);
+          renderCart();
+        });
+      });
+    }
+
+    // ---- Submit order ----
+    async function submitOrder(e) {
+      e.preventDefault();
+      const items = readCart();
+      if (!items.length) { alert("Your cart is empty."); return; }
+
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      const { subtotal, tax, total } = calcTotals(items);
+
+      const summaryLines = items.map((it, i) =>
+        `${i+1}. ${it.name} (${it.category || ""}) — ${it.weight || ""} x ${it.qty || 1} @ ${fmt(it.unitPrice || 0)}${it.cut ? `, Cut: ${it.cut}` : ""}${it.spice ? `, Spice: ${it.spice}` : ""}`
+      ).join("\n");
+
+      const orderPayload = {
+        name: data.name,
+        phone: data.phone,
+        preferredTime: data.time || "",
+        contactMethod: data.contact || "call",
+        notes: data.notes || "",
+        items,
+        subtotal, tax, total
+      };
+
+      // 1) Try serverless endpoint if you added it
+      try {
+        const res = await fetch("/api/order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderPayload)
+        });
+        if (res.ok) {
+          alert("Thank you! Your order was sent. We will confirm shortly.");
+          localStorage.removeItem(CART_KEY);
+          location.href = "index.html#home";
+          return;
+        }
+      } catch (_) {
+        // fall through to email
+      }
+
+      // 2) Fallback: open an email draft with the order
+      const subject = encodeURIComponent(`Order from ${data.name} (${data.phone})`);
+      const body = encodeURIComponent(
+`Customer: ${data.name}
+Phone: ${data.phone}
+Preferred time: ${data.time || "-"}
+Contact: ${data.contact || "call"}
+Notes: ${data.notes || "-"}
+
+Items:
+${summaryLines}
+
+Subtotal: ${fmt(subtotal)}
+Tax: ${fmt(tax)}
+Total: ${fmt(total)}
+`
+      );
+
+      // Put your shop email below:
+      const shopEmail = "orders@example.com";
+      window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
+    }
+
+    // ---- Init ----
+    document.addEventListener("DOMContentLoaded", () => {
+      updateCartCount();
+      renderCart();
+      $("#order-form").addEventListener("submit", submitOrder);
+      $("#clear-cart").addEventListener("click", () => {
+        if (confirm("Clear all items from cart?")) {
+          localStorage.removeItem(CART_KEY);
+          renderCart();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
