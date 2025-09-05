@@ -170,6 +170,15 @@ section { padding: 3.5rem 0 1.25rem; }
   .options { flex-direction: column; align-items: stretch; }
   .options label { width: 100%; }
 }
+/* Green box highlight around section headings */
+.categories .heading,
+.products .heading {
+  border: 2px solid var(--green-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f8fff8; /* light green background for contrast */
+}
+
 
 /* --------- Checkout page helpers (global so markup can reuse) --------- */
 .cart-card { background: #fff; box-shadow: var(--shadow); border-radius: .75rem; overflow: hidden; }
