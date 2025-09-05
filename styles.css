@@ -76,6 +76,15 @@ section { padding: 3.5rem 0 1.25rem; }
 .heading h1 { font-size: clamp(1.25rem, 3vw, 1.8rem); font-weight: 800; }
 .heading .btn { margin-left: auto; }
 
+/* Green box highlight for key section headings */
+.categories .heading,
+.products .heading {
+  border: 2px solid var(--green-color);
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f8fff8;
+}
+
 /* --------- Buttons --------- */
 .btn {
   display: inline-flex; align-items: center; gap: .5rem; justify-content: center;
@@ -170,15 +179,6 @@ section { padding: 3.5rem 0 1.25rem; }
   .options { flex-direction: column; align-items: stretch; }
   .options label { width: 100%; }
 }
-/* Green box highlight around section headings */
-.categories .heading,
-.products .heading {
-  border: 2px solid var(--green-color);
-  border-radius: 8px;
-  padding: 1rem;
-  background: #f8fff8; /* light green background for contrast */
-}
-
 
 /* --------- Checkout page helpers (global so markup can reuse) --------- */
 .cart-card { background: #fff; box-shadow: var(--shadow); border-radius: .75rem; overflow: hidden; }
@@ -220,3 +220,4 @@ section { padding: 3.5rem 0 1.25rem; }
 
 /* --------- Misc --------- */
 #menu-icon { display: none; }
+
