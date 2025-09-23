@@ -252,15 +252,16 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(orderPayload)
         });
-        if (res.ok) {
-          alert("Thank you! Your order was sent. We will confirm shortly.");
-          localStorage.removeItem(CART_KEY);
-          location.href = "index.html#home";
-          return;
-        }
-      } catch (_) {
-        // fall through to email
+
+        if (!res.ok) throw new Error("Email send failed");
+
+        // Show success UI and optionally clear cart
+        alert("Order placed! We’ve emailed your order to the shop.");
+      } catch (e) {
+        console.error(e);
+        alert("Sorry, something went wrong sending your order. Please call the store.");
       }
+
 
       // 2) Fallback: open an email draft with the order
       const subject = encodeURIComponent(`Order from ${data.name} (${data.phone})`);
@@ -281,7 +282,7 @@ Total: ${fmt(total)}
       );
 
       // Put your shop email below:
-      const shopEmail = "sherinhalal2024@gmail.com";
+      const shopEmail = "isparshpatel@gmail.com";
       window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
     }
 
