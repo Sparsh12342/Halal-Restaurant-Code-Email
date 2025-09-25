@@ -68,6 +68,14 @@ body {
   padding-top: 0;
   overflow-x: hidden;
   position: relative;
+  /* Prevent zoom on double-tap for mobile */
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 body::before {
@@ -127,6 +135,39 @@ header{
   background: var(--green-gradient); color: var(--white-color); transform: translateY(-2px); box-shadow: var(--shadow-md);
 }
 #menu-icon { display: none; font-size: 24px; z-index: 10001; color: var(--black-color); cursor: pointer; }
+
+/* Mobile menu styles */
+@media (max-width: 768px) {
+  #menu-icon { display: block; }
+  
+  .navbar {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    background: rgba(232, 245, 232, 0.95);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: right 0.3s ease;
+    z-index: 1000;
+  }
+  
+  .navbar.active {
+    right: 0;
+  }
+  
+  .navbar a {
+    font-size: 1.5rem;
+    margin: 1rem 0;
+    padding: 1rem 2rem;
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: var(--shadow-md);
+  }
+}
 
 /* HERO container */
 .container{
@@ -687,6 +728,49 @@ img {
     0 0 0 4px rgba(212, 175, 55, 0.2);
 }
 
+/* Mobile Touch Improvements */
+@media (max-width: 768px) {
+  /* Ensure minimum touch target size of 44px */
+  .btn, .navbar a, .categories-container .box, .products-container .box {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Add active states for mobile touch feedback */
+  .btn:active {
+    transform: scale(0.95);
+    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
+  }
+  
+  .categories-container .box:active,
+  .products-container .box:active {
+    transform: scale(0.98);
+  }
+  
+  /* Make navbar more touch-friendly */
+  .navbar a {
+    padding: 1rem 1.5rem;
+    margin: 0.25rem;
+  }
+  
+  /* Improve button spacing and sizing */
+  .btn {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    margin: 0.5rem 0;
+  }
+  
+  /* Ensure cart icons are touchable */
+  .categories-container .box .bx,
+  .products-container .box .bx {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   header { padding: 1rem 2rem; }
@@ -707,8 +791,29 @@ img {
   .home-text h1 { font-size: 2rem; }
   .home-text p { font-size: 0.9rem; }
   .home-text span { font-size: 0.9rem; }
-  .btn { padding: 0.5rem 1rem; font-size: 0.875rem; }
+  .btn { 
+    padding: 0.75rem 1.5rem; 
+    font-size: 0.9rem; 
+    min-height: 44px;
+    min-width: 44px;
+  }
   .heading h1 { font-size: 1.5rem; }
   .about img { height: 250px; }
   .container { min-height: 45vh; }
+  
+  /* Ensure all interactive elements are touch-friendly */
+  .categories-container .box,
+  .products-container .box {
+    min-height: 120px;
+    padding: 1.5rem;
+  }
+  
+  /* Make sure cart icons are always visible and touchable on mobile */
+  .categories-container .box .bx,
+  .products-container .box .bx {
+    display: flex !important;
+    position: relative;
+    bottom: auto;
+    margin-top: 1rem;
+  }
 }
