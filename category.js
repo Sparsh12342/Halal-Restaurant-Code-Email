@@ -283,8 +283,22 @@ function getParam(name) {
 const CART_KEY = "shm_cart_v1";
 function readCart() { try { return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); } catch { return []; } }
 function writeCart(items) { localStorage.setItem(CART_KEY, JSON.stringify(items)); updateCartCount(); }
-function addToCart(item) { const cart = readCart(); cart.push(item); writeCart(cart); }
-function updateCartCount() { $("#cart-count") && ($("#cart-count").textContent = readCart().length); }
+function addToCart(item) { 
+  try {
+    const cart = readCart(); 
+    cart.push(item); 
+    writeCart(cart);
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+  }
+}
+function updateCartCount() { 
+  const cartCountEl = $("#cart-count");
+  if (cartCountEl) {
+    const count = readCart().length;
+    cartCountEl.textContent = count;
+  }
+}
 
 // --- Render page based on ?cat= ---
 function render() {
@@ -293,11 +307,13 @@ function render() {
   const title = $("#cat-title");
   const container = $("#items");
 
+  // Debug info removed for production
+
   updateCartCount();
 
   if (!data) {
     if (title) title.textContent = "Category not found";
-    if (container) container.innerHTML = "<p>Invalid category.</p>";
+    if (container) container.innerHTML = "<p>Invalid category. Available categories: " + Object.keys(DATA).join(", ") + "</p>";
     return;
   }
 
@@ -306,7 +322,7 @@ function render() {
   if (!container) return;
   container.innerHTML = ""; // clear
 
-  data.forEach(product => {
+  data.forEach((product, index) => {
     const weights = Object.keys(product.prices);
 
     const img = h("img", { src: product.img, alt: product.name });
@@ -321,29 +337,57 @@ function render() {
     // skin selector
     const skinSel = h("select", { class: "opt" }, ["With Skin", "Without Skin"].map(s => h("option", { value: s }, [s])));
 
-    const weightSel = h("select", { class: "opt" }, weights.map(w =>
-      h("option", { value: w }, [`${w} — $${product.prices[w].toFixed(2)}`])
-    ));
+    const weightSel = h("select", { class: "opt" }, weights.map(w => {
+      // Convert weight to lbs format
+      let weightInLbs;
+      if (w.includes("kg")) {
+        const kgValue = parseFloat(w.replace("kg", ""));
+        weightInLbs = (kgValue * 2.20462).toFixed(1) + " lbs";
+      } else if (w.includes("g")) {
+        const gValue = parseFloat(w.replace("g", ""));
+        weightInLbs = (gValue * 0.00220462).toFixed(2) + " lbs";
+      } else {
+        weightInLbs = w; // Keep as is if already in lbs or other format
+      }
+      return h("option", { value: w }, [`${weightInLbs} — $${product.prices[w].toFixed(2)}`]);
+    }));
 
-    const qty = h("input", { type: "number", min: "1", value: "1", style: "width:80px;" });
+    // quantity field removed as requested
+    
+    // Form controls are now interactive
 
     const addBtn = h("button", { class: "btn", type: "button" }, ["Add to Cart ", h("i", { class: "bx bx-cart-alt" })]);
-    addBtn.addEventListener("click", () => {
+    
+    function handleAddToCart(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const chosenWeight = weightSel.value;
       const price = product.prices[chosenWeight] ?? 0;
-      addToCart({
+      
+      const cartItem = {
         category: cat,
         name: product.name,
         cut: cutSel.value,
         pieces: piecesSel.value,
         skin: skinSel.value,
         weight: chosenWeight,
-        qty: Number(qty.value || 1),
+        qty: 1, // Default quantity since qty field is removed
         unitPrice: price
-      });
+      };
+      
+      addToCart(cartItem);
       addBtn.textContent = "Added!";
+      
+      // Show visual feedback
+      showCartNotification(`${product.name} added to cart!`);
+      
       setTimeout(() => (addBtn.innerHTML = "Add to Cart <i class='bx bx-cart-alt'></i>"), 900);
-    });
+    }
+    
+    // Add click and touch events
+    addBtn.addEventListener("click", handleAddToCart);
+    addBtn.addEventListener("touchend", handleAddToCart);
 
     const box = h("div", { class: "box" }, [
       img,
@@ -351,10 +395,9 @@ function render() {
       name,
       h("div", { class: "options" }, [
         h("label", {}, ["Cut: ", cutSel]),
-        h("label", { style: "margin-left:10px" }, ["Pieces: ", piecesSel]),
-        h("label", { style: "margin-left:10px" }, ["Skin: ", skinSel]),
-        h("label", { style: "margin-left:10px" }, ["Weight: ", weightSel]),
-        h("label", { style: "margin-left:10px" }, ["Qty: ", qty]),
+        h("label", {}, ["Pieces: ", piecesSel]),
+        h("label", {}, ["Skin: ", skinSel]),
+        h("label", {}, ["Weight: ", weightSel]),
       ]),
       addBtn
     ]);
@@ -363,4 +406,101 @@ function render() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", render);
+// Test function removed for production
+
+// Show cart notification
+function showCartNotification(message) {
+  // Remove existing notification
+  const existing = document.querySelector('.cart-notification');
+  if (existing) existing.remove();
+  
+  // Create notification
+  const notification = document.createElement('div');
+  notification.className = 'cart-notification';
+  notification.textContent = message;
+  notification.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--primary-green);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    z-index: 10000;
+    font-weight: 500;
+    animation: slideIn 0.3s ease;
+  `;
+  
+  // Add animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  `;
+  document.head.appendChild(style);
+  
+  document.body.appendChild(notification);
+  
+  // Remove after 3 seconds
+  setTimeout(() => {
+    notification.style.animation = 'slideIn 0.3s ease reverse';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+// Mobile form improvements
+document.addEventListener("DOMContentLoaded", function() {
+  render();
+  
+  // Test button removed for production
+  
+  // Add mobile-specific improvements after rendering
+  setTimeout(() => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Improve select dropdowns on mobile
+      const selects = document.querySelectorAll('.opt');
+      selects.forEach(select => {
+        // Add touch-friendly styling
+        select.style.fontSize = '16px'; // Prevents zoom on iOS
+        select.style.minHeight = '48px';
+        select.style.padding = '12px';
+        
+        // Add focus/blur event handling instead of touch events
+        select.addEventListener('focus', function(e) {
+          this.style.borderColor = 'var(--primary-green)';
+          this.style.boxShadow = '0 0 0 3px rgba(26, 77, 58, 0.1)';
+        });
+        
+        select.addEventListener('blur', function(e) {
+          this.style.borderColor = '';
+          this.style.boxShadow = '';
+        });
+      });
+      
+      // Improve number inputs on mobile
+      const numberInputs = document.querySelectorAll('input[type="number"]');
+      numberInputs.forEach(input => {
+        input.style.fontSize = '16px'; // Prevents zoom on iOS
+        input.style.minHeight = '48px';
+        input.style.padding = '12px';
+        input.style.textAlign = 'center';
+        
+        // Add focus/blur event handling instead of touch events
+        input.addEventListener('focus', function(e) {
+          this.style.borderColor = 'var(--primary-green)';
+          this.style.boxShadow = '0 0 0 3px rgba(26, 77, 58, 0.1)';
+        });
+        
+        input.addEventListener('blur', function(e) {
+          this.style.borderColor = '';
+          this.style.boxShadow = '';
+        });
+      });
+    }
+  }, 100);
+});
