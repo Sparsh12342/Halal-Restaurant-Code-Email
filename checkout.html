@@ -8,6 +8,9 @@
   <!-- Reuse your styles + icons -->
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css" />
+  
+  <!-- EmailJS SDK -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
   <style>
     /* Light polish for the cart table using your palette */
@@ -74,6 +77,10 @@
           <div>
             <label>Phone</label>
             <input required name="phone" placeholder="(xxx) xxx-xxxx" />
+          </div>
+          <div>
+            <label>Email (Optional)</label>
+            <input type="email" name="email" placeholder="your@email.com" />
           </div>
           <div>
             <label>Preferred Time</label>
@@ -232,40 +239,55 @@
       const { subtotal, tax, total } = calcTotals(items);
 
       const summaryLines = items.map((it, i) =>
-        `${i+1}. ${it.name} (${it.category || ""}) — ${it.weight || ""} x ${it.qty || 1} @ ${fmt(it.unitPrice || 0)}${it.cut ? `, Cut: ${it.cut}` : ""}${it.spice ? `, Spice: ${it.spice}` : ""}`
+        `${i+1}. ${it.name} (${it.category || ""}) — ${it.weight || ""} x ${it.qty || 1} @ ${fmt(it.unitPrice || 0)}${it.cut ? `, Cut: ${it.cut}` : ""}${it.pieces ? `, Pieces: ${it.pieces}` : ""}${it.skin ? `, Skin: ${it.skin}` : ""}`
       ).join("\n");
 
-      const orderPayload = {
-        name: data.name,
-        phone: data.phone,
-        preferredTime: data.time || "",
-        contactMethod: data.contact || "call",
-        notes: data.notes || "",
-        items,
-        subtotal, tax, total
-      };
+      // Show loading state
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.innerHTML = 'Sending... <i class="bx bx-loader-alt bx-spin"></i>';
+      submitBtn.disabled = true;
 
-      // 1) Try serverless endpoint if you added it
       try {
-        const res = await fetch("/api/order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderPayload)
-        });
+        // Initialize EmailJS (you'll need to get these from emailjs.com)
+        emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
 
-        if (!res.ok) throw new Error("Email send failed");
+        const templateParams = {
+          customer_name: data.name,
+          customer_phone: data.phone,
+          customer_email: data.email || "",
+          preferred_time: data.time || "Not specified",
+          contact_method: data.contact || "call",
+          notes: data.notes || "None",
+          order_items: summaryLines,
+          subtotal: fmt(subtotal),
+          tax: fmt(tax),
+          total: fmt(total),
+          order_date: new Date().toLocaleString()
+        };
 
-        // Show success UI and optionally clear cart
-        alert("Order placed! We’ve emailed your order to the shop.");
-      } catch (e) {
-        console.error(e);
-        alert("Sorry, something went wrong sending your order. Please call the store.");
-      }
+        // Send email using EmailJS
+        const result = await emailjs.send(
+          "YOUR_SERVICE_ID", // Replace with your EmailJS service ID
+          "YOUR_TEMPLATE_ID", // Replace with your EmailJS template ID
+          templateParams
+        );
 
+        if (result.status === 200) {
+          alert("Order placed successfully! We've emailed your order to the shop.");
+          localStorage.removeItem(CART_KEY);
+          renderCart();
+          e.target.reset(); // Clear the form
+        } else {
+          throw new Error("Email service returned error");
+        }
 
-      // 2) Fallback: open an email draft with the order
-      const subject = encodeURIComponent(`Order from ${data.name} (${data.phone})`);
-      const body = encodeURIComponent(
+      } catch (error) {
+        console.error("EmailJS failed:", error);
+        
+        // Fallback: open email client
+        const subject = encodeURIComponent(`Order from ${data.name} (${data.phone})`);
+        const body = encodeURIComponent(
 `Customer: ${data.name}
 Phone: ${data.phone}
 Preferred time: ${data.time || "-"}
@@ -279,11 +301,15 @@ Subtotal: ${fmt(subtotal)}
 Tax: ${fmt(tax)}
 Total: ${fmt(total)}
 `
-      );
-
-      // Put your shop email below:
-      const shopEmail = "isparshpatel@gmail.com";
-      window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
+        );
+        
+        const shopEmail = "isparshpatel@gmail.com";
+        window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
+      } finally {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+      }
     }
 
     // ---- Init ----
