@@ -249,8 +249,8 @@
       submitBtn.disabled = true;
 
       try {
-        // Initialize EmailJS (you'll need to get these from emailjs.com)
-        emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+        // Initialize EmailJS
+        emailjs.init("w1AWT9EqxKnYu4acc"); // Your EmailJS public key
 
         const templateParams = {
           customer_name: data.name,
@@ -268,8 +268,8 @@
 
         // Send email using EmailJS
         const result = await emailjs.send(
-          "YOUR_SERVICE_ID", // Replace with your EmailJS service ID
-          "YOUR_TEMPLATE_ID", // Replace with your EmailJS template ID
+          "service_fknl31d", // Your EmailJS service ID
+          "template_1vmn96o", // Your EmailJS template ID
           templateParams
         );
 
@@ -303,8 +303,37 @@ Total: ${fmt(total)}
 `
         );
         
-        const shopEmail = "isparshpatel@gmail.com";
-        window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
+        // Fallback: Use a webhook or form submission service
+        // You can use services like Formspree, Netlify Forms, or Web3Forms
+        
+        // Option 1: Formspree (easiest)
+        const formspreeUrl = "https://formspree.io/f/YOUR_ACTUAL_FORM_ID";
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('phone', data.phone);
+        formData.append('email', data.email || '');
+        formData.append('time', data.time || '');
+        formData.append('contact', data.contact || '');
+        formData.append('notes', data.notes || '');
+        formData.append('order_items', summaryLines);
+        formData.append('subtotal', fmt(subtotal));
+        formData.append('tax', fmt(tax));
+        formData.append('total', fmt(total));
+        
+        try {
+          await fetch(formspreeUrl, {
+            method: 'POST',
+            body: formData
+          });
+          alert("Order placed successfully! We'll contact you soon.");
+          localStorage.removeItem(CART_KEY);
+          renderCart();
+          e.target.reset();
+        } catch (formError) {
+          // Final fallback to email client
+          const shopEmail = "YOUR_EMAIL@gmail.com"; // Replace with your preferred email
+          window.location.href = `mailto:${shopEmail}?subject=${subject}&body=${body}`;
+        }
       } finally {
         // Reset button state
         submitBtn.innerHTML = originalText;

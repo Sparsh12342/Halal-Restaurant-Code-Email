@@ -391,7 +391,7 @@ function render() {
 
     const box = h("div", { class: "box" }, [
       img,
-      h("span", {}, ["Customize your order"]),
+      h("span", {}, ["Add to Cart"]),
       name,
       h("div", { class: "options" }, [
         h("label", {}, ["Cut: ", cutSel]),

@@ -1,5 +1,29 @@
 
 
+// Cart initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize cart count from localStorage
+    const CART_KEY = "shm_cart_v1";
+    function readCart() { 
+        try { 
+            return JSON.parse(localStorage.getItem(CART_KEY) || "[]"); 
+        } catch { 
+            return []; 
+        } 
+    }
+    
+    function updateCartCount() {
+        const cartCountEl = document.getElementById("cart-count");
+        if (cartCountEl) {
+            const count = readCart().length;
+            cartCountEl.textContent = count;
+        }
+    }
+    
+    // Update cart count on page load
+    updateCartCount();
+});
+
 // Mobile touch improvements
 document.addEventListener('DOMContentLoaded', function() {
     // Add touch event listeners for mobile devices
