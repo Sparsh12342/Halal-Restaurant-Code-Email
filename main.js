@@ -6,16 +6,29 @@ console.log('=== JavaScript file loaded! ===');
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== DOM LOADED - JavaScript is working! ===');
     
-    // Test if JavaScript is working - add test button immediately
-    const testButton = document.createElement('button');
-    testButton.textContent = 'TEST CLICK';
-    testButton.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; background: red; color: white; padding: 10px; border: none; border-radius: 5px; font-size: 14px;';
-    testButton.onclick = function() {
-        alert('CLICK WORKS! JavaScript is functioning properly.');
-        console.log('Test button clicked successfully');
-    };
-    document.body.appendChild(testButton);
-    console.log('Test button added to page');
+    // Simple test - just add a visible element
+    const testDiv = document.createElement('div');
+    testDiv.innerHTML = 'JS WORKING';
+    testDiv.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; background: red; color: white; padding: 10px; font-size: 14px;';
+    document.body.appendChild(testDiv);
+    console.log('Test div added to page');
+    
+    // Test basic click functionality
+    setTimeout(function() {
+        console.log('Testing basic click functionality...');
+        const testLinks = document.querySelectorAll('a');
+        console.log('Found links:', testLinks.length);
+        
+        testLinks.forEach(function(link, index) {
+            console.log('Link ' + index + ':', link.href, link.textContent);
+            
+            // Add simple click handler
+            link.addEventListener('click', function(e) {
+                console.log('LINK CLICKED:', this.href);
+                // Don't prevent default - let it work normally
+            });
+        });
+    }, 1000);
     
     // Initialize cart count from localStorage
     const CART_KEY = "shm_cart_v1";

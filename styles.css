@@ -74,13 +74,8 @@ body {
   -webkit-touch-callout: none;
 }
 
-/* Global mobile touch fixes - SIMPLIFIED */
+/* Global mobile touch fixes - ULTRA SIMPLIFIED */
 @media (max-width: 768px) {
-  * {
-    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-    touch-action: manipulation;
-  }
-  
   /* Disable heavy effects on mobile for performance */
   * {
     backdrop-filter: none !important;
@@ -90,15 +85,7 @@ body {
     animation: none !important;
   }
   
-  /* Re-enable essential transforms for layout */
-  .categories-container .box,
-  .products-container .box,
-  .btn {
-    transform: none !important;
-    transition: none !important;
-  }
-  
-  /* Force all interactive elements to be clickable */
+  /* Make EVERYTHING clickable */
   a, button, .btn, .categories-container .box, .products-container .box, .bx {
     pointer-events: auto !important;
     z-index: 999 !important;
@@ -106,24 +93,6 @@ body {
     cursor: pointer !important;
     min-height: 44px !important;
     min-width: 44px !important;
-  }
-  
-  /* Ensure no elements are blocking clicks */
-  .categories-container .box,
-  .products-container .box {
-    pointer-events: auto !important;
-    z-index: 999 !important;
-    position: relative !important;
-    cursor: pointer !important;
-  }
-  
-  /* Make sure cart icons are clickable */
-  .categories-container .box .bx,
-  .products-container .box .bx {
-    pointer-events: auto !important;
-    z-index: 1000 !important;
-    position: relative !important;
-    cursor: pointer !important;
     display: block !important;
   }
   
