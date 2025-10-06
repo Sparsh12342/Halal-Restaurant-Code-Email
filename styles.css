@@ -333,7 +333,7 @@ header{
 body:not(.category-page) .categories-container .box .bx{
   padding: 12px; background: var(--green-gradient); color: var(--white-color); border-radius: 50%; margin-top: 2rem;
   position: absolute; top: 75%; left: 50%; transform: translate(-50%, -50%); display: none; box-shadow: var(--shadow-lg); z-index: 1;
-  border: 2px solid var(--white-color); pointer-events: none;
+  border: 2px solid var(--white-color); pointer-events: auto;
 }
 body:not(.category-page) .categories-container .box:hover .bx{ display: block; transition: 0.2s all linear; }
 body:not(.category-page) .categories-container .box:hover::after {
@@ -402,7 +402,7 @@ body:not(.category-page) .categories-container .box:hover::after {
 /* Only apply green button hover effect to main index page, not category page */
 body:not(.category-page) .products-container .box .bx{ padding: 12px; background: var(--green-gradient); color: var(--white-color); border-radius: 50%;
   margin-top: 2rem; position: absolute; top: 75%; left: 50%; transform: translate(-50%, -50%); display: none; box-shadow: var(--shadow-lg); z-index: 1; 
-  border: 2px solid var(--white-color); pointer-events: none; }
+  border: 2px solid var(--white-color); pointer-events: auto; }
 body:not(.category-page) .products-container .box:hover .bx{ display: block; transition: 0.2s all linear; }
 body:not(.category-page) .products-container .box:hover::after {
   content: '';
@@ -874,6 +874,8 @@ img {
   .btn, .navbar a, .categories-container .box, .products-container .box {
     min-height: 44px;
     min-width: 44px;
+    pointer-events: auto !important;
+    z-index: 1;
   }
   
   /* Add active states for mobile touch feedback */
@@ -955,5 +957,7 @@ img {
     position: relative;
     bottom: auto;
     margin-top: 1rem;
+    pointer-events: auto !important;
+    z-index: 10 !important;
   }
 }

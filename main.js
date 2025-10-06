@@ -48,38 +48,53 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 150);
             });
             
-            // Prevent double-tap zoom on buttons
-            button.addEventListener('touchend', function(e) {
-                e.preventDefault();
-            });
+            // Allow normal click behavior - double-tap zoom is handled by CSS touch-action
         });
         
         // Ensure proper touch handling for cart icons
         const cartIcons = document.querySelectorAll('.categories-container .box .bx, .products-container .box .bx');
         cartIcons.forEach(icon => {
             icon.addEventListener('touchstart', function(e) {
-                e.stopPropagation();
                 this.style.transform = 'scale(0.9)';
             });
             
             icon.addEventListener('touchend', function(e) {
-                e.stopPropagation();
                 setTimeout(() => {
                     this.style.transform = '';
                 }, 150);
             });
         });
         
-        // Add mobile menu toggle functionality
-        const menuIcon = document.getElementById('menu-icon');
-        const navbar = document.querySelector('.navbar');
+    }
+    
+    // Add mobile menu toggle functionality (works on all devices)
+    const menuIcon = document.getElementById('menu-icon');
+    const navbar = document.querySelector('.navbar');
+    
+    if (menuIcon && navbar) {
+        menuIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            navbar.classList.toggle('active');
+            this.classList.toggle('bx-x');
+        });
         
-        if (menuIcon && navbar) {
-            menuIcon.addEventListener('click', function() {
-                navbar.classList.toggle('active');
-                this.classList.toggle('bx-x');
+        // Close menu when clicking on a link
+        const navLinks = navbar.querySelectorAll('a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                navbar.classList.remove('active');
+                menuIcon.classList.remove('bx-x');
             });
-        }
+        });
+        
+        // Close menu when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!navbar.contains(e.target) && !menuIcon.contains(e.target)) {
+                navbar.classList.remove('active');
+                menuIcon.classList.remove('bx-x');
+            }
+        });
     }
 });
 
