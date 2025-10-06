@@ -29,42 +29,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add touch event listeners for mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
+    // Force enable touch events for all clickable elements
+    const clickableElements = document.querySelectorAll('a, button, .btn, .navbar a, .categories-container .box, .products-container .box, .bx');
+    
+    clickableElements.forEach(element => {
+        // Ensure element is clickable
+        element.style.pointerEvents = 'auto';
+        element.style.cursor = 'pointer';
+        element.style.zIndex = '10';
+        
+        // Add touch event handling
+        element.addEventListener('touchstart', function(e) {
+            e.stopPropagation();
+            this.style.transform = 'scale(0.95)';
+            this.style.transition = 'transform 0.1s ease';
+        });
+        
+        element.addEventListener('touchend', function(e) {
+            e.stopPropagation();
+            setTimeout(() => {
+                this.style.transform = '';
+                this.style.transition = '';
+            }, 150);
+        });
+        
+        // Ensure click events work
+        element.addEventListener('click', function(e) {
+            console.log('Click detected on:', this);
+        });
+    });
+    
     if (isMobile) {
-        // Add touch feedback to buttons
-        const buttons = document.querySelectorAll('.btn, .navbar a, .categories-container .box, .products-container .box');
+        console.log('Mobile device detected, applying mobile-specific fixes');
         
-        buttons.forEach(button => {
-            // Add touch start event for immediate feedback
-            button.addEventListener('touchstart', function(e) {
-                this.style.transform = 'scale(0.95)';
-                this.style.transition = 'transform 0.1s ease';
-            });
-            
-            // Add touch end event to reset
-            button.addEventListener('touchend', function(e) {
-                setTimeout(() => {
-                    this.style.transform = '';
-                    this.style.transition = '';
-                }, 150);
-            });
-            
-            // Allow normal click behavior - double-tap zoom is handled by CSS touch-action
+        // Add mobile-specific touch handling
+        const mobileElements = document.querySelectorAll('.categories-container .box, .products-container .box');
+        mobileElements.forEach(element => {
+            element.style.minHeight = '44px';
+            element.style.minWidth = '44px';
+            element.style.touchAction = 'manipulation';
         });
-        
-        // Ensure proper touch handling for cart icons
-        const cartIcons = document.querySelectorAll('.categories-container .box .bx, .products-container .box .bx');
-        cartIcons.forEach(icon => {
-            icon.addEventListener('touchstart', function(e) {
-                this.style.transform = 'scale(0.9)';
-            });
-            
-            icon.addEventListener('touchend', function(e) {
-                setTimeout(() => {
-                    this.style.transform = '';
-                }, 150);
-            });
-        });
-        
     }
     
     // Add mobile menu toggle functionality (works on all devices)

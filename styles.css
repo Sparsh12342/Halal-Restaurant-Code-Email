@@ -66,12 +66,27 @@ body {
   line-height: var(--line-height);
   color: var(--text-color);
   background: linear-gradient(135deg, #e8f5e8 0%, #d1f2d1 50%, #e8f5e8 100%);
-  padding-top: 0;
+  padding-top: 80px; /* Account for fixed header */
   overflow-x: hidden;
   position: relative;
   /* Prevent zoom on double-tap for mobile */
   touch-action: manipulation;
   -webkit-touch-callout: none;
+}
+
+/* Global mobile touch fixes */
+@media (max-width: 768px) {
+  * {
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    touch-action: manipulation;
+  }
+  
+  a, button, .btn, .categories-container .box, .products-container .box {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative;
+    cursor: pointer;
+  }
 }
 
 body::before {
@@ -90,7 +105,7 @@ body::before {
 }
 
 header{
-  position: absolute;
+  position: fixed;
   width: 100%;
   top: 0;
   right: 0;
@@ -875,7 +890,28 @@ img {
     min-height: 44px;
     min-width: 44px;
     pointer-events: auto !important;
-    z-index: 1;
+    z-index: 10 !important;
+    position: relative;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+  }
+  
+  /* Force all links and buttons to be clickable */
+  a, button, .btn, .bx {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative;
+    touch-action: manipulation;
+  }
+  
+  /* Ensure categories and products are clickable */
+  .categories-container .box,
+  .products-container .box {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+    position: relative;
+    touch-action: manipulation;
+    cursor: pointer;
   }
   
   /* Add active states for mobile touch feedback */
