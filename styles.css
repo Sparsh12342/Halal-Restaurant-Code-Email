@@ -118,13 +118,35 @@ body {
     height: auto !important;
   }
   
-  /* Prevent button warping on active state */
+  /* Prevent button warping on ALL states - override desktop effects */
   .btn:active,
   .btn:focus,
+  .btn:hover,
+  .btn::before,
+  .btn::after {
+    transform: none !important;
+    -webkit-transform: none !important;
+    -moz-transform: none !important;
+    -ms-transform: none !important;
+    -o-transform: none !important;
+    scale: 1 !important;
+    translate: none !important;
+    translateY: 0 !important;
+    translateX: 0 !important;
+  }
+  
+  /* Override the desktop hover effect on mobile */
   .btn:hover {
     transform: none !important;
     -webkit-transform: none !important;
-    scale: 1 !important;
+    background: var(--green-gradient) !important;
+  }
+  
+  /* Override the desktop active effect on mobile */
+  .btn:active {
+    transform: none !important;
+    -webkit-transform: none !important;
+    background: var(--green-gradient) !important;
   }
   
   /* Optimize header for mobile performance */
@@ -959,15 +981,11 @@ img {
     cursor: pointer;
   }
   
-  /* Add active states for mobile touch feedback */
-  .btn:active {
-    transform: scale(0.95);
-    background: linear-gradient(135deg, var(--dark-green) 0%, var(--primary-green) 100%);
-  }
+  /* Mobile touch feedback handled by JavaScript - no CSS transforms */
   
   .categories-container .box:active,
   .products-container .box:active {
-    transform: scale(0.98);
+    transform: none !important;
   }
   
   /* Make navbar more touch-friendly */
