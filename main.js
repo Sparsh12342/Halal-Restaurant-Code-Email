@@ -38,15 +38,20 @@ document.addEventListener('DOMContentLoaded', function() {
         element.style.zIndex = '999';
         element.style.position = 'relative';
         
-        // Add touch feedback for mobile
+        // Add touch feedback for mobile (preserve shape)
         if (isMobile) {
             element.addEventListener('touchstart', function(e) {
+                // Only change background color, preserve all other styles
                 this.style.backgroundColor = 'rgba(0,0,0,0.1)';
+                this.style.transform = 'none'; // Ensure no transform changes
+                this.style.borderRadius = 'var(--border-radius)'; // Preserve border radius
             });
             
             element.addEventListener('touchend', function(e) {
                 setTimeout(() => {
                     this.style.backgroundColor = '';
+                    this.style.transform = '';
+                    this.style.borderRadius = '';
                 }, 200);
             });
         }
