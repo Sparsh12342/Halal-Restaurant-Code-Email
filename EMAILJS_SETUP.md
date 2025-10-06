@@ -102,3 +102,4 @@ const result = await emailjs.send(
 - Check that your email service is connected
 - Verify template variables match the code
 - Check browser console for error messages
+

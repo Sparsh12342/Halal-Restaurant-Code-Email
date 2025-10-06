@@ -59,3 +59,4 @@ Make sure these are installed:
 ```bash
 npm install nodemailer zod
 ```
+
