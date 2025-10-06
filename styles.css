@@ -81,6 +81,23 @@ body {
     touch-action: manipulation;
   }
   
+  /* Disable heavy effects on mobile for performance */
+  * {
+    backdrop-filter: none !important;
+    filter: none !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  /* Re-enable essential transforms for layout */
+  .categories-container .box,
+  .products-container .box,
+  .btn {
+    transform: none !important;
+    transition: none !important;
+  }
+  
   /* Force all interactive elements to be clickable */
   a, button, .btn, .categories-container .box, .products-container .box, .bx {
     pointer-events: auto !important;
@@ -108,6 +125,12 @@ body {
     position: relative !important;
     cursor: pointer !important;
     display: block !important;
+  }
+  
+  /* Optimize header for mobile performance */
+  header {
+    backdrop-filter: none !important;
+    background: rgba(232, 245, 232, 0.95) !important;
   }
 }
 
@@ -213,7 +236,7 @@ header{
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
-  background-attachment: fixed;
+  /* Removed background-attachment: fixed for mobile performance */
   overflow: hidden;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;

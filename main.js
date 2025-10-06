@@ -1,7 +1,6 @@
 
 // Immediate test to see if JavaScript is loading
 console.log('=== JavaScript file loaded! ===');
-alert('JavaScript is loading!');
 
 // Combined initialization and mobile fixes
 document.addEventListener('DOMContentLoaded', function() {
