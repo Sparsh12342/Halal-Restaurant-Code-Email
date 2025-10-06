@@ -1,7 +1,23 @@
 
+// Immediate test to see if JavaScript is loading
+console.log('=== JavaScript file loaded! ===');
+alert('JavaScript is loading!');
 
-// Cart initialization
+// Combined initialization and mobile fixes
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== DOM LOADED - JavaScript is working! ===');
+    
+    // Test if JavaScript is working - add test button immediately
+    const testButton = document.createElement('button');
+    testButton.textContent = 'TEST CLICK';
+    testButton.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; background: red; color: white; padding: 10px; border: none; border-radius: 5px; font-size: 14px;';
+    testButton.onclick = function() {
+        alert('CLICK WORKS! JavaScript is functioning properly.');
+        console.log('Test button clicked successfully');
+    };
+    document.body.appendChild(testButton);
+    console.log('Test button added to page');
+    
     // Initialize cart count from localStorage
     const CART_KEY = "shm_cart_v1";
     function readCart() { 
@@ -22,24 +38,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update cart count on page load
     updateCartCount();
-});
-
-// Mobile touch improvements - SIMPLIFIED APPROACH
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, setting up mobile fixes');
+    console.log('Cart initialized');
     
-    // Test if JavaScript is working
-    console.log('JavaScript is working!');
-    
-    // Add a simple test button to verify clicks work
-    const testButton = document.createElement('button');
-    testButton.textContent = 'TEST CLICK';
-    testButton.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; background: red; color: white; padding: 10px;';
-    testButton.onclick = function() {
-        alert('CLICK WORKS!');
-        console.log('Test button clicked successfully');
-    };
-    document.body.appendChild(testButton);
+    // Mobile touch improvements - SIMPLIFIED APPROACH
+    console.log('Setting up mobile fixes...');
     
     // Detect mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
