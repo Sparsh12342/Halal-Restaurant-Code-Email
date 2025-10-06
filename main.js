@@ -24,52 +24,80 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
 });
 
-// Mobile touch improvements
+// Mobile touch improvements - SIMPLIFIED APPROACH
 document.addEventListener('DOMContentLoaded', function() {
-    // Add touch event listeners for mobile devices
+    console.log('DOM loaded, setting up mobile fixes');
+    
+    // Test if JavaScript is working
+    console.log('JavaScript is working!');
+    
+    // Add a simple test button to verify clicks work
+    const testButton = document.createElement('button');
+    testButton.textContent = 'TEST CLICK';
+    testButton.style.cssText = 'position: fixed; top: 10px; right: 10px; z-index: 9999; background: red; color: white; padding: 10px;';
+    testButton.onclick = function() {
+        alert('CLICK WORKS!');
+        console.log('Test button clicked successfully');
+    };
+    document.body.appendChild(testButton);
+    
+    // Detect mobile
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    console.log('Is mobile:', isMobile);
     
-    // Force enable touch events for all clickable elements
+    // Get all clickable elements
     const clickableElements = document.querySelectorAll('a, button, .btn, .navbar a, .categories-container .box, .products-container .box, .bx');
+    console.log('Found clickable elements:', clickableElements.length);
     
-    clickableElements.forEach(element => {
-        // Ensure element is clickable
+    clickableElements.forEach((element, index) => {
+        console.log(`Setting up element ${index}:`, element);
+        
+        // Force make it clickable
         element.style.pointerEvents = 'auto';
         element.style.cursor = 'pointer';
-        element.style.zIndex = '10';
+        element.style.zIndex = '999';
+        element.style.position = 'relative';
         
-        // Add touch event handling
-        element.addEventListener('touchstart', function(e) {
-            e.stopPropagation();
-            this.style.transform = 'scale(0.95)';
-            this.style.transition = 'transform 0.1s ease';
-        });
-        
-        element.addEventListener('touchend', function(e) {
-            e.stopPropagation();
-            setTimeout(() => {
-                this.style.transform = '';
-                this.style.transition = '';
-            }, 150);
-        });
-        
-        // Ensure click events work
+        // Add simple click handler
         element.addEventListener('click', function(e) {
-            console.log('Click detected on:', this);
+            console.log('CLICK DETECTED on:', this, 'href:', this.href);
+            // Don't prevent default - let the link work normally
         });
+        
+        // Add touch handler for mobile
+        if (isMobile) {
+            element.addEventListener('touchstart', function(e) {
+                console.log('TOUCH START on:', this);
+                this.style.backgroundColor = 'rgba(0,0,0,0.1)';
+            });
+            
+            element.addEventListener('touchend', function(e) {
+                console.log('TOUCH END on:', this);
+                setTimeout(() => {
+                    this.style.backgroundColor = '';
+                }, 200);
+            });
+        }
     });
     
-    if (isMobile) {
-        console.log('Mobile device detected, applying mobile-specific fixes');
+    // Special handling for category and product boxes
+    const categoryBoxes = document.querySelectorAll('.categories-container .box');
+    const productBoxes = document.querySelectorAll('.products-container .box');
+    
+    [...categoryBoxes, ...productBoxes].forEach(box => {
+        console.log('Setting up box:', box);
+        box.style.pointerEvents = 'auto';
+        box.style.cursor = 'pointer';
+        box.style.zIndex = '999';
+        box.style.position = 'relative';
         
-        // Add mobile-specific touch handling
-        const mobileElements = document.querySelectorAll('.categories-container .box, .products-container .box');
-        mobileElements.forEach(element => {
-            element.style.minHeight = '44px';
-            element.style.minWidth = '44px';
-            element.style.touchAction = 'manipulation';
-        });
-    }
+        // Make sure the link inside works
+        const link = box.querySelector('a') || box;
+        if (link) {
+            link.style.pointerEvents = 'auto';
+            link.style.zIndex = '1000';
+        }
+    });
     
     // Add mobile menu toggle functionality (works on all devices)
     const menuIcon = document.getElementById('menu-icon');
